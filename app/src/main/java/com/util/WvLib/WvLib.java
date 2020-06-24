@@ -1,13 +1,9 @@
-package com.neonlight.util;
+package com.util.WvLib;
 
-import android.app.Activity;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
-import android.util.Log;
 import android.view.View;
-import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -15,46 +11,41 @@ import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-
 /**
  * Created by User on 2016/6/28.
- * Source Project：WebView3-CheckOnline
- * Ver:1.2
+ * Source Project：WvCheckOnline
+ * Ver:1.3
  */
-public class ObjectWebView {
+public class WvLib {
 
     WebView wvSource;
     String strUrlSource;
     ProgressBar pbSource;
     TextView tvMsg;
-    int intObjectType=0;//1.WebView,2.WebView,ProgressBar
+    int intObjectType=0;//1.WebView,2.Add ProgressBar,3.Add Offline MessageText
     boolean isOnline=false;
-    Activity actSource;
+    Context context;
     int intDelayed=500;
 
-
-    public ObjectWebView(WebView wvSourceInput,
-                         String strUrlSourceInput){
+    public WvLib(WebView wvSourceInput,String strUrlSourceInput){
         wvSource=wvSourceInput;
         strUrlSource=strUrlSourceInput;
         intObjectType=1;
     }
 
-    public ObjectWebView(WebView wvSourceInput,ProgressBar pbSrourceInput,
-                         String strUrlSourceInput){
+    public WvLib(WebView wvSourceInput,String strUrlSourceInput,
+                 ProgressBar pbSrourceInput){
         wvSource=wvSourceInput;
         pbSource=pbSrourceInput;
         strUrlSource=strUrlSourceInput;
         intObjectType=2;
     }
 
-    public ObjectWebView(Activity actSrourceInput,
-                         WebView wvSourceInput,ProgressBar pbSrourceInput,TextView tvMsgInput,
-                         String strUrlSourceInput){
-        actSource=actSrourceInput;
+    public WvLib(Context context,
+                 WebView wvSourceInput,String strUrlSourceInput,
+                 ProgressBar pbSrourceInput,
+                 TextView tvMsgInput){
+        this.context =context;
         wvSource=wvSourceInput;
         pbSource=pbSrourceInput;
         tvMsg=tvMsgInput;
@@ -64,12 +55,17 @@ public class ObjectWebView {
     public void webViewLoagPage(){
         switch (intObjectType){
             case 1:
+                //Case: [WebView + Url]
                 webViewLoadPageType1();
                 break;
             case 2:
+                //Case: [WebView + Url] + ProgressBar
+                //PS: Add ProgressBar
                 webViewLoadPageType2();
                 break;
             case 3:
+                //Case: Context + [WebView + Url] + ProgressBar + offline message TextView
+                //PS: Add Context,TextView
                 webViewLoadPageType3();
                 break;
         }
@@ -95,86 +91,6 @@ public class ObjectWebView {
 
         wvSource.setWebChromeClient(new WebChromeClient());
         wvSource.loadUrl(strUrlSource);
-    }
-
-    private void webViewLoadPageType2_bk(){
-/*
-        wvSource.getSettings().setJavaScriptEnabled(true);	// Use JavaScript
-        wvSource.getSettings().setBuiltInZoomControls(true);	// Use Zoom Function
-        wvSource.invokeZoomPicker();	                        // Show Zoom Tool
-        wvSource.setWebViewClient(new WebViewClient());		// Build and use WebViewClient Object
-
-
-        wvSource.setWebChromeClient(new WebChromeClient() {
-            public void onProgressChanged(WebView view, int progress) {
-                pbSource.setProgress(progress);       //set up progress function
-                pbSource.setVisibility(progress < 100? View.VISIBLE: View.GONE);  //let progressBar show or dispear by progress
-            }
-        });
-
-*/
-        /*
-        WebSettings webSettings = wvSource.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setDatabaseEnabled(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setGeolocationDatabasePath(actSrource.getFilesDir().getPath());
-        webSettings.setGeolocationEnabled(true);
-
-        wvSource.setWebChromeClient(new WebChromeClient(){
-            @Override
-            public void onGeolocationPermissionsShowPrompt(String origin, GeolocationPermissions.Callback callback) {
-                callback.invoke(origin, true, false);
-            }
-        });
-*/
-
-        String TAG="LOG_WEBVIEW";
-        WebSettings ws = wvSource.getSettings();
-        ws.setJavaScriptEnabled(true);
-        ws.setAllowFileAccess(true);
-        ws.setGeolocationEnabled(true);
-
-/*
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.ECLAIR) {
-            try {
-                Log.d(TAG, "Enabling HTML5-Features");
-                Method m1 = WebSettings.class.getMethod("setDomStorageEnabled", new Class[]{Boolean.TYPE});
-                m1.invoke(ws, Boolean.TRUE);
-
-                Method m2 = WebSettings.class.getMethod("setDatabaseEnabled", new Class[]{Boolean.TYPE});
-                m2.invoke(ws, Boolean.TRUE);
-
-                Method m3 = WebSettings.class.getMethod("setDatabasePath", new Class[]{String.class});
-                m3.invoke(ws, "/data/data/" + actSrource.getPackageName() + "/databases/");
-
-                Method m4 = WebSettings.class.getMethod("setAppCacheMaxSize", new Class[]{Long.TYPE});
-                m4.invoke(ws, 1024 * 1024 * 8);
-
-                Method m5 = WebSettings.class.getMethod("setAppCachePath", new Class[]{String.class});
-                m5.invoke(ws, "/data/data/" + actSrource.getPackageName() + "/cache/");
-
-                Method m6 = WebSettings.class.getMethod("setAppCacheEnabled", new Class[]{Boolean.TYPE});
-                m6.invoke(ws, Boolean.TRUE);
-
-                Log.d(TAG, "Enabled HTML5-Features");
-
-                wvSource.loadUrl(strUrlSource);   // Link to the website,can only the domain name, without page name
-
-
-
-            } catch (NoSuchMethodException e) {
-                Log.e(TAG, "Reflection fail", e);
-            } catch (InvocationTargetException e) {
-                Log.e(TAG, "Reflection fail", e);
-            } catch (IllegalAccessException e) {
-                Log.e(TAG, "Reflection fail", e);
-            }catch (android.content.ActivityNotFoundException e){
-                Log.e(TAG, "Reflection fail", e);
-            }
-        }
-
-*/
     }
 
 
@@ -240,7 +156,7 @@ public class ObjectWebView {
     //[WebViewCheckOnline]Function inActivity
     public boolean checkNetworkConnected() {
         boolean result = false;
-        ConnectivityManager CM = (ConnectivityManager)actSource.getSystemService(Context.CONNECTIVITY_SERVICE);
+        ConnectivityManager CM = (ConnectivityManager)context.getSystemService(Context.CONNECTIVITY_SERVICE);
         if (CM == null) {
             result = false;
         } else {
@@ -262,8 +178,6 @@ public class ObjectWebView {
         }
         return result;
     }
+
+
 }
-//Version Note:
-//1.0 First Version
-//1.1 Add set Url function,Add Scale XY function
-//1.2 Add check online function
