@@ -6,6 +6,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.ProgressBar;
+import android.widget.Switch;
 import android.widget.TextView;
 
 /** Usage Example
@@ -38,13 +39,16 @@ public class NtWv {
     boolean isOnline=false;
     Context context;
     int intDelayed=500;
-    boolean isLoadPage = false;
+    boolean isLoadPage = true;
 
+    //Type 1
     public NtWv(WebView wvSourceInput, String strUrlSourceInput){
         this.webView =wvSourceInput;
         this.strUrlSource=strUrlSourceInput;
         intObjectType=1;
     }
+
+    //Type 1L
     public NtWv(WebView wvSourceInput, String strUrlSourceInput,boolean isLoadPage){
         this.webView =wvSourceInput;
         this.strUrlSource=strUrlSourceInput;
@@ -55,6 +59,7 @@ public class NtWv {
         }
     }
 
+    //Type 2
     public NtWv(WebView wvSourceInput, String strUrlSourceInput,
                 ProgressBar pbSrourceInput){
         this.webView =wvSourceInput;
@@ -63,6 +68,21 @@ public class NtWv {
         intObjectType=2;
     }
 
+    //Type 2L
+    public NtWv(WebView wvSourceInput, String strUrlSourceInput,
+                ProgressBar pbSrourceInput, Boolean isLoadPage){
+        this.webView =wvSourceInput;
+        this.pbSource=pbSrourceInput;
+        this.strUrlSource=strUrlSourceInput;
+        this.isLoadPage = isLoadPage;
+        intObjectType=2;
+
+        if(isLoadPage){
+            loagPage();
+        }
+    }
+
+    //Type 3
     public NtWv(Context context,
                 WebView wvSourceInput, String strUrlSourceInput,
                 ProgressBar pbSrourceInput,
@@ -75,6 +95,7 @@ public class NtWv {
         intObjectType=3;
     }
 
+    //Type 3L
     public NtWv(Context context,
                 WebView wvSourceInput, String strUrlSourceInput,
                 ProgressBar pbSrourceInput,
@@ -93,6 +114,27 @@ public class NtWv {
     }
 
 
+    //Type 4L
+    public NtWv(Context context,
+                WebView wvSourceInput, String strUrlSourceInput,
+                ProgressBar pbSrourceInput,
+                TextView tvMsgInput,
+                Switch swCam,
+                Switch swMicMute,
+                Boolean isLoadPage){
+        this.context =context;
+        this.webView =wvSourceInput;
+        this.pbSource=pbSrourceInput;
+        this.tvMsg=tvMsgInput;
+        this.strUrlSource=strUrlSourceInput;
+        this.isLoadPage = isLoadPage;
+        intObjectType=4;
+
+        if(isLoadPage){
+            loagPage();
+        }
+    }
+
     public void loagPage(){
         switch (intObjectType){
             case 1:
@@ -108,6 +150,11 @@ public class NtWv {
                 //Case: Context + [WebView + Url] + ProgressBar + offline message TextView
                 //PS: Add Context,TextView
                 webViewLoadPageType3();
+                break;
+            case 4:
+                //Case: Context + [WebView + Url] + ProgressBar + offline message TextView
+                //PS: Add Context,TextView
+                webViewLoadPageType4();
                 break;
         }
     }
@@ -184,6 +231,38 @@ public class NtWv {
 
     }
 
+    private void webViewLoadPageType4(){
+
+        updateIsOnline();
+
+        if(isOnline){
+            tvMsg.setVisibility(TextView.GONE);
+            webView.setVisibility(WebView.VISIBLE);
+
+
+            webView.getSettings().setJavaScriptEnabled(true);	// Use JavaScript
+            webView.getSettings().setBuiltInZoomControls(true);	// Use Zoom Function
+            webView.invokeZoomPicker();	                        // Show Zoom Tool
+            webView.setWebViewClient(new WebViewClient());		// Build and use WebViewClient Object
+
+            webView.getSettings().setLoadWithOverviewMode(true);//Scale XY
+            webView.getSettings().setUseWideViewPort(true);//Scale XY
+
+            webView.setWebChromeClient(new WebChromeClient() {
+                public void onProgressChanged(WebView view, int progress) {
+                    pbSource.setProgress(progress);       //set up progress function
+                    pbSource.setVisibility(progress < 100? View.VISIBLE: View.GONE);  //let progressBar show or dispear by progress
+                }
+            });
+
+            webView.loadUrl(strUrlSource);   // Link to the website,can only the domain name, without page name
+
+        }else{
+            tvMsg.setVisibility(TextView.VISIBLE);
+            webView.setVisibility(WebView.GONE);
+        }
+
+    }
 
     //[WebViewCheckOnline]Function inActivity
     public void updateIsOnline(){
