@@ -32,19 +32,5 @@
         android:id="@+id/TvMsg"
         android:layout_centerVertical="true"
         android:layout_centerHorizontal="true" />
-    <Switch
-        android:id="@+id/swCam"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentRight="true" />
-    <Switch
-        android:id="@+id/swMicMute"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/swCam"
-        android:layout_alignParentRight="true" />
-
-
 
 </RelativeLayout>
